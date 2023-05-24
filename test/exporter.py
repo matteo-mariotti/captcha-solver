@@ -89,7 +89,7 @@ def run(filename):
         else:
             final_rects.append((x, y, w, h))
 
-    # remove rectangles that contain only white pixels
+    # remove rectangles that contain basically only white pixels
     final_rects = [rect for rect in final_rects if np.sum(thresh[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2]]) < 254 * rect[2] * rect[3]]
 
     count = 0
