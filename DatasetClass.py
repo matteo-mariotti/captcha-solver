@@ -19,7 +19,7 @@ class CaptchaDataset_1(Dataset):
     # return the item at the index
     def __getitem__(self, index):
         # get the image name from the csv file
-        img_path = os.path.join(self.root_dir, str(index) + '.png')
+        img_path = os.path.join(self.root_dir, str(self.annotations.iloc[index, 0]) + '.png')
         # read the image using cv2
         image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
         # get the label from the csv file
