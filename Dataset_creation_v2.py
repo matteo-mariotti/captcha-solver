@@ -77,6 +77,10 @@ for photo in os.listdir(path):
 if not os.path.exists('dataset'):
     os.makedirs('dataset')
 
+    with open('dataset_1.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['image_name', 'label'])
+
 # Save the images in the folders
 for i, img in enumerate(X):
     # Resize the image to 50x50
@@ -86,7 +90,7 @@ for i, img in enumerate(X):
     # Save the image in the dataset folder
     cv2.imwrite('dataset/' + str(i) + '.png', img)
     # Add a line to the csv file with the image name and the label
-    with open('profiles1.csv', 'a', newline='') as file:
+    with open('dataset_1.csv', 'a', newline='') as file:
         writer = csv.writer(file)
         # Write the image name and the label in the csv file, the label should be bteewen 0 and 35 (26 letters + 10 numbers), 0->0, 1->1, ..., 9->9, A->10, B->11, ..., Z->35
         # Create the map from the label to the letter
