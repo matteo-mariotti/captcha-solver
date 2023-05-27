@@ -10,40 +10,6 @@ mser = cv2.MSER_create()
 
 path = 'samples/'
 
-def get_bounding_boxes(img, X, y2, filename, j):
-
-    cv2.rectangle(img, (30,12), (50,49), 0, 1)
-    cv2.rectangle(img, (50,12), (70,49), 0, 1)
-    cv2.rectangle(img, (70,12), (90,49), 0, 1)
-    cv2.rectangle(img, (90,12), (110,49),0, 1)
-    cv2.rectangle(img, (110,12),(130,49),0, 1)
-
-    # Let's crop each letter
-    crop = img[12:49, 30:50]
-    X.append(crop)
-    y2.append(filename[0])
-    j.append(filename + str(0))
-
-    crop = img[12:49, 50:70]
-    X.append(crop)
-    y2.append(filename[1])
-    j.append(filename + str(1))
-
-    crop = img[12:49, 70:90]
-    X.append(crop)
-    y2.append(filename[2])
-    j.append(filename + str(2))
-
-    crop = img[12:49, 90:110]
-    X.append(crop)
-    y2.append(filename[3])
-    j.append(filename + str(3))
-
-    crop = img[12:49, 110:130]
-    X.append(crop)
-    y2.append(filename[4])
-    j.append(filename + str(4))
-
 def get_bounding_boxesV2(thresh, X, y2, filename, j):
 
     mser = cv2.MSER_create()
