@@ -12,12 +12,6 @@ path = 'samples/'
 
 def get_bounding_boxes(img, X, y2, filename, j):
 
-    cv2.rectangle(img, (30,12), (50,49), 0, 1)
-    cv2.rectangle(img, (50,12), (70,49), 0, 1)
-    cv2.rectangle(img, (70,12), (90,49), 0, 1)
-    cv2.rectangle(img, (90,12), (110,49),0, 1)
-    cv2.rectangle(img, (110,12),(130,49),0, 1)
-
     # Let's crop each letter
     crop = img[12:49, 30:50]
     X.append(crop)
