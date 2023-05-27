@@ -60,8 +60,6 @@ for image in os.listdir(files_path):
         if (len(rects)>10):
             # Ignore the image
             break
-        if (i>3):
-            break
         count += 1
         # Save the image in the folder in grayscale
         cv2.imwrite('./datasetN2/' + str(count) + '.png', img[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2]]) 
