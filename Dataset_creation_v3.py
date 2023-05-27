@@ -1,3 +1,4 @@
+import shutil
 from PIL import Image
 import cv2
 import os
@@ -132,12 +133,12 @@ def get_bounding_boxesV2(thresh, X, y2, filename, j):
         # this is for safety but it should be improved
 
 
-        colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255,255,0), (255,0,255)]
-
-        # Draw the rectangles  
-        for i, rect in enumerate(final_rects):
-            print(i)
-            cv2.rectangle(im2, (rect[0], rect[1]), (rect[0]+rect[2], rect[1]+rect[3]), colors[i], 1) 
+        #colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255,255,0), (255,0,255)]
+#
+        ## Draw the rectangles  
+        #for i, rect in enumerate(final_rects):
+        #    print(i)
+        #    cv2.rectangle(im2, (rect[0], rect[1]), (rect[0]+rect[2], rect[1]+rect[3]), colors[i], 1) 
             
         for i, (x, y, w, h) in enumerate(final_rects):
             #cv2.rectangle(im2, (x, y), (x+w, y+h), color=(0, 255, 0), thickness=1)
@@ -184,8 +185,18 @@ for photo in os.listdir(path):
 # Let's save the dataset in a convenient folder structure
 
 # Create the dataset folder
-if not os.path.exists('datasetV2'):
-    os.makedirs('datasetV2')
+if os.path.exists('dataset'):
+    shutil.rmtree('dataset')
+
+os.makedirs('dataset')
+
+# if the csv file already exists, delete it
+if os.path.exists('dataset_1.csv'):
+    os.remove('dataset_1.csv')
+
+    with open('dataset_1.csv', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['image_name', 'label'])
 
 # Save the images in the folders
 for i, img in enumerate(X):
@@ -194,9 +205,9 @@ for i, img in enumerate(X):
     # Make the image binary
     img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)[1]
     # Save the image in the dataset folder
-    cv2.imwrite('datasetV2/' + str(j[i]) + str(i) + '.png', img)
+    cv2.imwrite('dataset/' + str(i) + '.png', img)
     # Add a line to the csv file with the image name and the label
-    with open('dataset_2.csv', 'a', newline='') as file:
+    with open('dataset_1.csv', 'a', newline='') as file:
         writer = csv.writer(file)
         # Write the image name and the label in the csv file, the label should be bteewen 0 and 35 (26 letters + 10 numbers), 0->0, 1->1, ..., 9->9, A->10, B->11, ..., Z->35
         # Create the map from the label to the letter
