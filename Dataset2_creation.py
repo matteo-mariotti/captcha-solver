@@ -1,3 +1,4 @@
+import shutil
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,29 +11,28 @@ files_path = "./samples_2/"
 def split(image):
     mser = cv2.MSER_create()
 
-    regions, rects = mser.detectRegions(image)
+    _, rects = mser.detectRegions(image)
 
     # sort rectangles by left pixel
     rects = sorted(rects, key=lambda x: x[0])
-
     return rects
 
 
 def transform_image(img):
-
-    # make all gray pixel above 200 white
+    # make all gray pixel brighter than [200, 200, 200] white (to remove the background noise)
     img[np.where((img > [200, 200, 200]).all(axis=2))] = [255, 255, 255]
 
-    # convert to grayscale
+    # convert the image to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # blur image
+    # blur the image (to remove airtfacts)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
+    # sharpen the image (to make the letters clearer)
     sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
     sharpen = cv2.filter2D(blurred, -1, sharpen_kernel)
 
-    # threshold image
+    # threshold image (to convert it to a binary image)
     ret, thresh = cv2.threshold(sharpen, 220, 255, cv2.THRESH_BINARY)
 
     return thresh
@@ -40,11 +40,18 @@ def transform_image(img):
 
 count = 0
 
-with open('dataset_2.csv', 'a', newline='') as file:
+# Delete the dataset folder if it already exists
+if os.path.exists('datasets/datasetN2'): shutil.rmtree('datasets/datasetN2')
+if os.path.exists('datasets/dataset_2.csv'): os.remove('datasets/dataset_2.csv')
+
+os.makedirs('datasets/datasetN2')
+
+# Initialize the csv file
+with open('datasets/dataset_2.csv', 'a', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(['image_name', 'label'])
 
-# Read all files in folder
+# Start populating the dataset
 for image in os.listdir(files_path):
     # Read image
     img = cv2.imread(files_path + image)
@@ -62,9 +69,9 @@ for image in os.listdir(files_path):
             break
         count += 1
         # Save the image in the folder in grayscale
-        cv2.imwrite('./datasetN2/' + str(count) + '.png', img[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2]]) 
+        cv2.imwrite('./datasets/datasetN2/' + str(count) + '.png', img[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2]]) 
         # Save a csv file with the name of the new image and the letter it contains (for training)
-        with open('dataset_2.csv', 'a', newline='') as file:
+        with open('datasets/dataset_2.csv', 'a', newline='') as file:
             writer = csv.writer(file)
             # Write the image name and the label in the csv file, the label should be bteewen 0 and 35 (26 letters + 10 numbers), 0->0, 1->1, ..., 9->9, A->10, B->11, ..., Z->35
             # Create the map from the label to the letter
@@ -74,7 +81,7 @@ for image in os.listdir(files_path):
 
 
 # Cicle through all the images in the folder and resize them to 28x28
-for image in os.listdir('./datasetN2/'):
-    img = cv2.imread('./datasetN2/' + image)
+for image in os.listdir('./datasets/datasetN2/'):
+    img = cv2.imread('./datasets/datasetN2/' + image)
     img = cv2.resize(img, (28, 28))
-    cv2.imwrite('./datasetN2/' + image, img)
+    cv2.imwrite('./datasets/datasetN2/' + image, img)

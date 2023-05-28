@@ -22,20 +22,20 @@ def rotate_image(image, angle):
 
 
 # Read the csv file
-df = pd.read_csv('dataset_1.csv')
+df = pd.read_csv('datasets/dataset_1.csv')
 
 # Get the number of images in the dataset
 num_images = len(df)
 
 # Iterate in the dataset folder
-for image in os.listdir("./dataset/"):
+for image in os.listdir("./datasets/dataset/"):
     # Get image name
     image_name = image.split('.')[0]
     # Get image label
 
     image_label = df.iloc[int(image_name), 1]
     # Read the image in grayscale
-    image = cv2.imread("./dataset/" + image, 0)
+    image = cv2.imread("./datasets/dataset/" + image, 0)
     # Add a white background to the image
     image = cv2.copyMakeBorder(
         image, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=[255, 255, 255])
@@ -47,9 +47,9 @@ for image in os.listdir("./dataset/"):
     rotated_image = cv2.resize(rotated_image, (50, 50))
     num_images += 1
     # Save the image
-    cv2.imwrite("./datasetAug/" + str(num_images) + '.png', rotated_image)
+    cv2.imwrite("./datasets/dataset/" + str(num_images) + '.png', rotated_image)
     # Write the image name and label to the csv file
-    with open('dataset_1.csv', 'a', newline='') as file:
+    with open('datasets/dataset_1.csv', 'a', newline='') as file:
         writer = csv.writer(file)
         # Write the image name and the label in the csv file, the label should be bteewen 0 and 35 (26 letters + 10 numbers), 0->0, 1->1, ..., 9->9, A->10, B->11, ..., Z->35
         # Create the map from the label to the letter
