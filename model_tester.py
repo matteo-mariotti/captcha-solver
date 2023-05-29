@@ -19,7 +19,7 @@ CHARACTERS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', '
 if __name__ == '__main__':
 
     print('Processing file: ' + CAPTCHA_PATH)
-    
+
     # we need to detect if the CAPTCHA is from the first or the second set
     # we can do this by checking the image shape
 
