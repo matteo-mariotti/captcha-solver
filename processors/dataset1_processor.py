@@ -1,23 +1,15 @@
-import shutil
-from PIL import Image
 import cv2
-import os
-import csv
 import numpy as np
-import matplotlib.pyplot as plt
-import torchvision.transforms as transforms
 
-mser = cv2.MSER_create()
+def get_bounding_boxesV2(img):
 
-path = 'samples/'
-
-def get_bounding_boxesV2(thresh, X, y2, filename, j):
+    X = []
 
     mser = cv2.MSER_create()
 
-    regions, rects = mser.detectRegions(thresh)
+    regions, rects = mser.detectRegions(img)
 
-    im2 = thresh.copy()
+    im2 = img.copy()
     final_rects = []
 
     # split rectangles that are too wide
@@ -52,7 +44,7 @@ def get_bounding_boxesV2(thresh, X, y2, filename, j):
             final_rects.append((x, y, w, h))
 
     # remove rectangles that contain basically only white pixels
-    final_rects = [rect for rect in final_rects if np.sum(thresh[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2]]) < 254 * rect[2] * rect[3]]
+    final_rects = [rect for rect in final_rects if np.sum(img[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2]]) < 254 * rect[2] * rect[3]]
 
     # merge regions that are horizontally contained (take the area from the top left to the bottom right)
     final_rects = [rect for rect in final_rects if not any([rect[0] > other_rect[0] and rect[1] > other_rect[1] and rect[0] + rect[2] < other_rect[0] + other_rect[2] and rect[1] + rect[3] < other_rect[1] + other_rect[3] for other_rect in final_rects if other_rect != rect])]
@@ -100,33 +92,24 @@ def get_bounding_boxesV2(thresh, X, y2, filename, j):
 
     # if we do not have 5 rectangles, the algorithm failed
     # so we try to split the image using fixed positions
+
     if len(final_rects) != 5: 
         # Split using the fixed positions
         # Let's crop each letter
         crop = im2[12:49, 30:50]
         X.append(crop)
-        y2.append(filename[0])
-        j.append(filename + str(0))
 
         crop = im2[12:49, 50:70]
         X.append(crop)
-        y2.append(filename[1])
-        j.append(filename + str(1))
 
         crop = im2[12:49, 70:90]
         X.append(crop)
-        y2.append(filename[2])
-        j.append(filename + str(2))
 
         crop = im2[12:49, 90:110]
         X.append(crop)
-        y2.append(filename[3])
-        j.append(filename + str(3))
 
         crop = im2[12:49, 110:130]
         X.append(crop)
-        y2.append(filename[4])
-        j.append(filename + str(4))
     else:
         for i, (x, y, w, h) in enumerate(final_rects):
             # Crop the image
@@ -143,75 +126,36 @@ def get_bounding_boxesV2(thresh, X, y2, filename, j):
             _, crop = cv2.threshold(crop, 185, 255, cv2.THRESH_BINARY)       
 
             X.append(crop)
-            y2.append(filename[i])
+    
+    return X
 
+def process_image(path):
 
-# For every image in the samples directory get the bounding boxes and create the dataset
-X = []
-y2 = []
-j = []
+    # Read the image
+    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 
-# Start populating the dataset
-for photo in os.listdir(path):
-    if photo.endswith('.png') or photo.endswith('.jpg'):
+    # Process the image
 
-        # Read the image
-        img = cv2.imread(path + photo, cv2.IMREAD_GRAYSCALE)
-        filename = photo[:-4]
+    # threshold the image to remove the background
+    img1_thr = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)[1]
 
-        # Process the image
+    # remove parts of the image that contain only noise
+    # as there are no letters close to the edges of the image
+    img1_thr[:, 0:25] = 255
+    img1_thr[:, 160:] = 255
 
-        # threshold the image to remove the background
-        img1_thr = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)[1]
+    # do a morphological closing to close the gaps between letters
+    close_img1 = cv2.morphologyEx(img1_thr, cv2.MORPH_CLOSE, np.ones((3,1), np.uint8))
 
-        # remove parts of the image that contain only noise
-        # as there are no letters close to the edges of the image
-        img1_thr[:, 0:25] = 255
-        img1_thr[:, 160:] = 255
+    # blur the image to smooth it and remove noise
+    smooth = cv2.GaussianBlur(close_img1, (3,3), 0)
 
-        # do a morphological closing to close the gaps between letters
-        close_img1 = cv2.morphologyEx(img1_thr, cv2.MORPH_CLOSE, np.ones((3,1), np.uint8))
+    # sharpen the image to make the letters more clear
+    sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+    sharpen = cv2.filter2D(smooth, -1, sharpen_kernel)
 
-        # blur the image to smooth it and remove noise
-        smooth = cv2.GaussianBlur(close_img1, (3,3), 0)
+    # threshold the image to get a binary image again
+    ret, thresh = cv2.threshold(sharpen, 185, 255, cv2.THRESH_BINARY)
 
-        # sharpen the image to make the letters more clear
-        sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-        sharpen = cv2.filter2D(smooth, -1, sharpen_kernel)
-
-        # threshold the image to get a binary image again
-        ret, thresh = cv2.threshold(sharpen, 185, 255, cv2.THRESH_BINARY)
-
-        # compute the bounding boxes around the letters
-        get_bounding_boxesV2(thresh, X, y2, filename, j)
-
-
-# Let's save the dataset in a convenient folder structure
-
-# Remove the dataset if it already exists
-if os.path.exists('datasets/dataset'): shutil.rmtree('datasets/dataset')
-if os.path.exists('datasets/dataset_1.csv'): os.remove('datasets/dataset_1.csv')
-
-os.makedirs('datasets/dataset')
-
-# Initialize the csv file
-with open('datasets/dataset_1.csv', 'a', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(['image_name', 'label'])
-
-# Save the images in the folders
-for i, img in enumerate(X):
-    # Resize the image to 50x50
-    img = cv2.resize(img, (50, 50))
-    # Make the image binary
-    img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)[1]
-    # Save the image in the dataset folder
-    cv2.imwrite('datasets/dataset/' + str(i) + '.png', img)
-    # Add a line to the csv file with the image name and the label
-    with open('datasets/dataset_1.csv', 'a', newline='') as file:
-        writer = csv.writer(file)
-        # Write the image name and the label in the csv file, the label should be bteewen 0 and 35 (26 letters + 10 numbers), 0->0, 1->1, ..., 9->9, A->10, B->11, ..., Z->35
-        # Create the map from the label to the letter
-        map = {'0':0, '1':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, 'a':10, 'b':11, 'c':12, 'd':13, 'e':14, 'f':15, 'g':16, 'h':17, 'i':18, 'j':19, 'k':20, 'l':21, 'm':22, 'n':23, 'o':24, 'p':25, 'q':26, 'r':27, 's':28, 't':29, 'u':30, 'v':31, 'w':32, 'x':33, 'y':34, 'z':35}
-        # Write the line in the csv file
-        writer.writerow([i, map[y2[i]]])
+    # compute the bounding boxes around the letters
+    return get_bounding_boxesV2(thresh)

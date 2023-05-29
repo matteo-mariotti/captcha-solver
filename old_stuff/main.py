@@ -1,4 +1,4 @@
-from DatasetClass import CaptchaDataset_1
+from test.DatasetClass import CaptchaDataset_1
 import torchvision.transforms as transforms
 import torch
 import torch.nn as nn
