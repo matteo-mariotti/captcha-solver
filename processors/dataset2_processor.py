@@ -9,6 +9,15 @@ def split(image):
 
     # sort rectangles by left pixel
     rects = sorted(rects, key=lambda x: x[0])
+
+    rects_in_rects = []
+    for i, rect in enumerate(rects):
+        if i == 0: continue
+        if rect[0] >= rects[i-1][0] and rect[1] >= rects[i-1][1] and rect[0]+rect[2] <= rects[i-1][0]+rects[i-1][2] and rect[1]+rect[3] <= rects[i-1][1]+rects[i-1][3]:
+            rects_in_rects.append(i)
+
+    rects = np.delete(rects, rects_in_rects, axis=0)
+
     return rects
 
 
