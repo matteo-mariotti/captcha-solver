@@ -2,9 +2,10 @@
 
 #### If models are already trained and saved
 
-Ensure models and captchas are saved in the paths specified at the beginning of `model_tester.py`
+Ensure models are saved in the paths specified at the beginning of `model_tester.py`
 
-1. Run the `model_tester.py` to solve a CAPTCHA.
+1. Set the path to a CAPTCHA image at the beginning of `model_tester.py`
+2. Run the `model_tester.py` to solve the CAPTCHA.
 
 #### If models are not trained yet
 
