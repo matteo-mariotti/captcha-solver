@@ -3,19 +3,19 @@ import cv2
 import os
 import csv
 
-import processors.dataset2_processor as processor
+import processors.dataset_B_processor as processor
 
 
 ########################### PARAMETERS ###########################
 
 # Path to the CAPTCHA samples directory
-SAMPLES_DIR = 'samples/type_2'
+SAMPLES_DIR = 'samples/type_B'
 
 # Path to the dataset directory (where the images will be saved)
-DATASET_DIR = 'datasets/datasetN2'
+DATASET_DIR = 'datasets/datasetB'
 
 # Path to the csv file containing the labels
-CSV_PATH = 'datasets/dataset_2.csv'
+CSV_PATH = 'datasets/dataset_B.csv'
 
 # if DATASET_DIR or CSV_PATH already exist, they will be overwritten
 

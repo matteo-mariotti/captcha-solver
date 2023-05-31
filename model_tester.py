@@ -2,14 +2,14 @@ import torch
 import torchvision.transforms as transforms
 import cv2
 
-import processors.dataset1_processor as dataset1_processor
-import processors.dataset2_processor as dataset2_processor
+import processors.dataset_A_processor as dataset_A_processor
+import processors.dataset_B_processor as dataset_B_processor
 
-MODEL1_PATH = 'models/model_1.pt'
-MODEL2_PATH = 'models/model_2.pt'
+MODEL1_PATH = 'models/model_A.pt'
+MODEL2_PATH = 'models/model_B.pt'
 
-#CAPTCHA_PATH = 'samples/type_1/type_1/2b827.png'
-CAPTCHA_PATH = 'samples/type_2/0a2GPKF628.jpg'
+CAPTCHA_PATH = 'samples/type_A/728n8.png'
+#CAPTCHA_PATH = 'samples/type_2/0a2GPKF628.jpg'
 
 PLATFORM = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         # image is from the first set
         print('image is from SET 1', "splitting the image in characters...", sep="\n")
         # split the captcha in characters using the correct algorithm
-        X = dataset1_processor.process_image(CAPTCHA_PATH)
+        X = dataset_A_processor.process_image(CAPTCHA_PATH)
 
         # load the model
         print("loading the model...")
@@ -39,7 +39,7 @@ if __name__ == '__main__':
         # image is from the second set
         print('image is from SET 2', "splitting the image in characters...", sep="\n")
         # split the captcha in characters using the correct algorithm
-        X = dataset2_processor.process_image(CAPTCHA_PATH)
+        X = dataset_B_processor.process_image(CAPTCHA_PATH)
 
         # load the model
         print("loading the model...")
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     # do the prediction
     with torch.no_grad():
-        print("predicting...")
+        print("predicting (using", PLATFORM, "platform)...")
         images = images.to(PLATFORM)
         outputs = model(images)
         _, predicted = torch.max(outputs, 1)
