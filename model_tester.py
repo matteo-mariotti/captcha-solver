@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
         # load the model
         print("loading the model...")
-        model = torch.jit.load(MODEL1_PATH)
+        model = torch.jit.load(MODEL1_PATH, map_location=PLATFORM)
         model = model.to(PLATFORM)
         model.eval()
     else:
