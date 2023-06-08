@@ -1,3 +1,4 @@
+import os
 import torch
 import torchvision.transforms as transforms
 import cv2
@@ -8,42 +9,34 @@ import processors.dataset_B_processor as dataset_B_processor
 MODEL1_PATH = 'models/model_A.pt'
 MODEL2_PATH = 'models/model_B.pt'
 
-CAPTCHA_PATH = 'samples/type_A/2356g.png'
-#CAPTCHA_PATH = 'samples/type_2/0a2GPKF628.jpg'
+CAPTCHAS_PATH = 'samples/type_A'
 
 PLATFORM = "cuda" if torch.cuda.is_available() else "cpu"
 
 CHARACTERS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
+def test(path):
 
-if __name__ == '__main__':
-
-    print('Processing file: ' + CAPTCHA_PATH)
+    #print('Processing file: ' + path)
 
     # we need to detect if the CAPTCHA is from the first or the second set
     # we can do this by checking the image shape
 
-    img = cv2.imread(CAPTCHA_PATH)
+    img = cv2.imread(path)
     if img.shape[0] == 50 and img.shape[1] == 200:
         # image is from the first set
-        print('image is from SET 1', "splitting the image in characters...", sep="\n")
+        #print('image is from SET 1', "splitting the image in characters...", sep="\n")
         # split the captcha in characters using the correct algorithm
-        X = dataset_A_processor.process_image(CAPTCHA_PATH)
+        X = dataset_A_processor.process_image(path)
 
-        # load the model
-        print("loading the model...")
-        model = torch.jit.load(MODEL1_PATH, map_location=PLATFORM)
-        model.eval()
+        model = model1
     else:
         # image is from the second set
-        print('image is from SET 2', "splitting the image in characters...", sep="\n")
+        #print('image is from SET 2', "splitting the image in characters...", sep="\n")
         # split the captcha in characters using the correct algorithm
-        X = dataset_B_processor.process_image(CAPTCHA_PATH)
+        X = dataset_B_processor.process_image(path)
 
-        # load the model
-        print("loading the model...")
-        model = torch.jit.load(MODEL2_PATH, map_location=PLATFORM)
-        model.eval()
+        model = model2
 
     # convert the images to PyTorch tensors
     image_tensors = []
@@ -58,7 +51,7 @@ if __name__ == '__main__':
 
     # do the prediction
     with torch.no_grad():
-        print("predicting (using", PLATFORM, "platform)...")
+        #print("predicting (using", PLATFORM, "platform)...")
         images = images.to(PLATFORM)
         outputs = model(images)
         _, predicted = torch.max(outputs, 1)
@@ -67,4 +60,32 @@ if __name__ == '__main__':
         predicted_letters = (CHARACTERS[predicted[i]] for i in range(len(predicted)))
 
         # print the predicted captcha value
-        print("Predicted value:", "".join(predicted_letters))
+        #print("Predicted value:", "".join(predicted_letters))
+
+        return "".join(predicted_letters)
+
+
+if __name__ == "__main__":
+    model1 = torch.jit.load(MODEL1_PATH, map_location=PLATFORM)
+    model1.eval()
+    model2 = torch.jit.load(MODEL2_PATH, map_location=PLATFORM)
+    model2.eval()
+
+    good = 0
+    bad = 0
+
+    for f in os.listdir(CAPTCHAS_PATH):
+        predicted_val = test(os.path.join(CAPTCHAS_PATH, f))
+
+        real_val = f.split('.')[0]
+
+        print('pred', predicted_val)
+        print('real', real_val)
+
+        if predicted_val == real_val: good += 1
+        else: bad += 1
+
+    print('Good predictions:', str(good))
+    print('Bad predictions:', str(bad))
+
+    print('Accuracy:', str(100 * good / (good + bad)), '%')

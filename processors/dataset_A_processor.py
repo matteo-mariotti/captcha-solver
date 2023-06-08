@@ -97,18 +97,23 @@ def get_bounding_boxesV2(img):
         # Split using the fixed positions
         # Let's crop each letter
         crop = im2[12:49, 30:50]
+        crop = cv2.resize(crop, (50, 50))
         X.append(crop)
 
         crop = im2[12:49, 50:70]
+        crop = cv2.resize(crop, (50, 50))
         X.append(crop)
 
         crop = im2[12:49, 70:90]
+        crop = cv2.resize(crop, (50, 50))
         X.append(crop)
 
         crop = im2[12:49, 90:110]
+        crop = cv2.resize(crop, (50, 50))
         X.append(crop)
 
         crop = im2[12:49, 110:130]
+        crop = cv2.resize(crop, (50, 50))
         X.append(crop)
     else:
         for i, (x, y, w, h) in enumerate(final_rects):
