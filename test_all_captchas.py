@@ -74,13 +74,15 @@ if __name__ == "__main__":
     good = 0
     bad = 0
 
+    print('Predicting all the CAPTCHAs...')
+
     for f in os.listdir(CAPTCHAS_PATH):
         predicted_val = test(os.path.join(CAPTCHAS_PATH, f))
 
         real_val = f.split('.')[0]
 
-        print('pred', predicted_val)
-        print('real', real_val)
+        #print('pred', predicted_val)
+        #print('real', real_val)
 
         if predicted_val == real_val: good += 1
         else: bad += 1
