@@ -33,7 +33,7 @@ if __name__ == '__main__':
         # load the model
         print("loading the model...")
         model = torch.jit.load(MODEL1_PATH, map_location=PLATFORM)
-        model = model.to(PLATFORM)
+        #model = model.to(PLATFORM)
         model.eval()
     else:
         # image is from the second set
@@ -43,8 +43,8 @@ if __name__ == '__main__':
 
         # load the model
         print("loading the model...")
-        model = torch.jit.load(MODEL2_PATH)
-        model = model.to(PLATFORM)
+        model = torch.jit.load(MODEL2_PATH, map_location=PLATFORM)
+        #model = model.to(PLATFORM)
         model.eval()
 
     # convert the images to PyTorch tensors
